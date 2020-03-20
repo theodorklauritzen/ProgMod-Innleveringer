@@ -4,7 +4,4 @@
 # Theodor 2G
 #
 
-class Integral:
-
-    def test1():
-        print("hei")
+from .rektangelMetoden import *
