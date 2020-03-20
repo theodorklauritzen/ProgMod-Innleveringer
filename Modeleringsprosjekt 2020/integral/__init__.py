@@ -5,3 +5,4 @@
 #
 
 from .rektangelMetoden import *
+from .trapesMetoden import *
