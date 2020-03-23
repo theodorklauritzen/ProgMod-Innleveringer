@@ -6,3 +6,4 @@
 
 from .rektangelMetoden import *
 from .trapesMetoden import *
+from .simpsonsMetode import *
