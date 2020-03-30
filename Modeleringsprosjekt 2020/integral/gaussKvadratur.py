@@ -37,6 +37,7 @@ def pAdd(poly1, poly2):
     # poly1 : Et polynom vi skal multiplisere med et polynom
     # poly2 : Et polynom vi skal multiplisere med et polynom
 
+    # Set ret til det polynomet med størst grad
     ret = poly1
     add = poly2
 
@@ -44,9 +45,11 @@ def pAdd(poly1, poly2):
         ret = poly2
         add = poly1
 
+    # Legg det minste polynomet til det største
     for i in range(len(add)):
         ret[i] += add[i]
 
+    # Returner resultatet
     return ret
 
 # Denne funksjonene returnerer Legendre polynomene
@@ -74,20 +77,24 @@ def legendrePolynom(n):
 
     ret = pMult(ret, [1 / n])
 
+    # Returner resultatet
     return ret
 
 # Denne funksjonene tar et polynom og returnerer en funksjon som gir y-verdiene til polynomet gitt x-verdien
 def fPoly(poly):
     # poly : Et polynom å returnere funksjonsuttrykket til
 
+    # Et funksjons uttrykk til polynomet
     def f(x):
         # x : En verdi å regne ut den tilsvarende y-verdien til
 
         ret = 0
 
+        # Regn ut verdien til funksjonsuttrykket i punktet x
         for i in range(len(poly)):
             ret += poly[i] * (x ** i)
 
+        # Returner resultatet
         return ret
 
     # Returner funksjonen
@@ -112,13 +119,18 @@ def halvveringsmetoden(f, a, b, tol = 1e-8):
 
     # Loop maksimum 10000 ganger
     for i in range(10000):
+        # Sett c midt i mellom a og b
         c = (a + b) / 2
 
+        # Se om c nærmere nok 0
         if abs(f(c)) < tol:
+            # Returner c hvis det er nærme nok 0
             return c
 
+        # Hvis nullpunktet er mellom a og c, sett b til c
         if f(a) * f(c) < 0:
             b = c
+        # Hvis nullpunktet er mellom c og b, sett a til c
         elif f(c) * f(b) < 0:
             a = c
 
@@ -133,16 +145,20 @@ def nullpunkter(f, a, b, tol = 1e-8, N = 50):
     # tol : toleransen på hvor nærme vi kan være nullpunktene
     # N : antall søkeområde vi deler inn i
 
+    # Finn bredden til hvert søkeområde
     dx = (b - a) / N
 
+    # En liste med nullpunkter å returnere
     ret = []
 
-    # Finn nullpunkter
+    # Finn nullpunktene
     for i in range(N):
         n = halvveringsmetoden(f, a + dx * i, a + dx * (i + 1), tol)
+        # Hvis halvveringsmetoden returnerte et nullpunkt legg det til i lista
         if not n is None:
             ret.append(n)
 
+    # Returner lista med nullpunkter
     return ret
 
 # En funksjon som returnerer nullpunktene til et legendrepolynom
@@ -150,19 +166,28 @@ def legendreNullpunkter(n, tol = 1e-8):
     # n : Graden til legendre polynomet
     # tol : toleransen på hvor nærme 0 et nullpunkt kan være
 
+    # Regn ut legendre polynomet
     p = legendrePolynom(n)
+    # Få et uttrykk ut i fra polynomet
     f = fPoly(p)
 
-    antallNullpunkter = math.floor(n / 2)
+    # IDEA: Finn antall nullpunkter, og jskke om det stemmer
+    #antallNullpunkter = math.floor(n / 2)
+
     # Her finner vi bare mellom 0 og 1, så kan vi regne ut de negative nullpunktene etterpå
     # Da blir progemmet raskere
     nullp = nullpunkter(f, 0, 1, tol)
 
+    # Regn ut de ekstra nullpunktene
     ekstraNullpunkter = []
+    # Sjekk om 0 er med i nullpunktene vi fant, så må vi ikke legge 0 igjen
+    # Hvis n er et oddetall har vi 0 i lista, så da må vi ikke legge til dette igjen
     inneholder0 = -1 if n % 2 == 0 else 0
+    # Loop gjennom baklengs for å til slutt få alt i stigende rekkefølge.
     for i in range(len(nullp) - 1, inneholder0, -1):
         ekstraNullpunkter.append(-nullp[i])
 
+    # Returner alle nullpunktene
     return ekstraNullpunkter + nullp
 
 # En funksjon for å gi momentan vekstfart i et punkt
@@ -171,6 +196,7 @@ def derF(f, x, h = 1e-8):
     # x : Et punkt å finne momentan vekst vekstfart
     # h : Et lite tall for å regne ut en liten økning
 
+    # Returner stigningen i punktet x
     return (f(x + h) - f(x - h)) / (2 * h)
 
 # En funksjon som finner en vekt til en x verdi
@@ -184,31 +210,50 @@ def weight(P, x):
 
 # En funksjon som tar punkter på en graf og vekter og regner ut summen av dem
 def calcValue(f, punkter, weights):
+    # f : en funksjon
+    # punkter : en liste med nullpunkter
+    # weights : en like lang liste med vekter til punktene
+
     ret = 0
 
+    # Regn ut summan av f(x) til alle punktene, multiplisert med den tilsvarende vekten til punktet
     for i in range(len(punkter)):
         ret += weights[i] * f(punkter[i])
 
+    # Returner resultatet
     return ret
 
 # En funksjon som bruker Gauss kvadratur til å regne integralet mellom -1 og 1
-def GaussIntegral1(f, n):
+def GaussIntegral1(f, n, brukCache = True):
     # f : en funksjon å regne ut integralet til
     # n : graden til legendrepolynomet
+    # brukCache : Om vi skal bruke hardcodede verdier i stedet for å regne dem ut, gitt at vi har punktet til den tilsvarende graden
 
+    # Sjekk om vi skal bruke chachen
+    if brukCache and len(gaussPointsWeights) >= n:
+        # Hent ut punktene og vektene til cachen
+        points, weights = gaussPointsWeights[n - 1]
+        # Returner resultatet av kaklueringen til punktene og vektene
+        return calcValue(nyF, points, weights)
+
+    # Finn x verdien til punktene vi skal regne ut
     nullp = legendreNullpunkter(n, tol = 1e-13)
 
+    # Regn ut Legendre polynomet med graden n
     lPoly = legendrePolynom(n)
+    # Lag et funksjonsuttrykk av Legendre polynomet
     lf = fPoly(lPoly)
 
     weights = []
 
+    # Lag en liste med de tilsvarende vektene til punktene vi fant
     for i in nullp:
         weights.append(weight(lf, i))
 
+    # Returner resultatet av kakuleringen til punktene og vektene
     return calcValue(f, nullp, weights)
 
-# En fuksjon som returerer en annen funksjon
+# En fuksjon som returerer en annen funksjon for å skise integralet mellom a og b til integralet mellom -1 og 1
 def endreIntervall(f, a, b):
     # f : en funksjon
     # a : starten på et intervall
@@ -220,8 +265,10 @@ def endreIntervall(f, a, b):
 
         return (b - a) / 2 * f((b - a) / 2 * x + (a + b) / 2)
 
+    # Returner funksjonen
     return ret
 
+# En funksjon som bruker Gauss kvadrartur til å regne ut det bestemte integralet til en funksjon
 def GaussKvadratur(f, a = -1, b = 1, N = 25, brukCache = True):
     # f : En funksjon å integrere
     # a : Starten på det bestemte integralet
@@ -232,15 +279,17 @@ def GaussKvadratur(f, a = -1, b = 1, N = 25, brukCache = True):
     # Fordi vi må ha en partall antall ukjente
     # Da må vi ha et partall antall ledd i polynomet
     # Dette skrever at polynommet er av grad k, der k er et oddetall
+    #
+    # Sjekk at N er et oddetall større enn 0
     if N % 2 == 0 or N < 1:
+        # Kast en feil hvis N er spesiefisert feil
         raise Exception("N må være et oddetall større enn 0")
 
+    # Regn ut legendre graden til den tilsvarende graden av polynomet som ble spesifisert
     legendreGrad = int((N + 1) / 2)
 
+    # Skvis funksjonen ned så a blir liggende på -1 og b på 1.
     nyF = endreIntervall(f, a, b)
 
-    if brukCache and len(gaussPointsWeights) >= legendreGrad:
-        points, weights = gaussPointsWeights[legendreGrad - 1]
-        return calcValue(nyF, points, weights)
-
-    return GaussIntegral1(nyF, legendreGrad)
+    # Returner Gausintegralet til nyF mellom -1 og 1
+    return GaussIntegral1(nyF, legendreGrad, brukCache)
