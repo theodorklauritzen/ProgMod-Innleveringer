@@ -4,6 +4,7 @@
 # Theodor 2G
 #
 
-from .rektangelMetoden import *
-from .trapesMetoden import *
-from .simpsonsMetode import *
+from .rektangelMetoden import RektangelMetoden
+from .trapesMetoden import TrapesMetoden
+from .simpsonsMetode import SimpsonsMetode
+from .gaussKvadratur import GaussKvadratur
