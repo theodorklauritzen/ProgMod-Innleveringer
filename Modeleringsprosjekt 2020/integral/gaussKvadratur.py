@@ -52,6 +52,7 @@ def endreIntervall(f, a, b):
     # Returner funksjonen
     return ret
 
+# Denne funksjonen regnet summen av fuksjonsverien i gitte punkter multiplisert med gitte vekter
 def regnSUM(f, punkter, vekter):
     # f : En fuksjon å bruke
     # punkter : puntker å regne ut funksjonsverdien til
