@@ -52,6 +52,19 @@ def endreIntervall(f, a, b):
     # Returner funksjonen
     return ret
 
+def regnSUM(f, punkter, vekter):
+    # f : En fuksjon å bruke
+    # punkter : puntker å regne ut funksjonsverdien til
+    # vekter : vektene vi må multiplisere hver fuksjonsverdi med
+
+    ret = 0
+
+    # Regn ut summan av f(x) til alle punktene, multiplisert med den tilsvarende vekten til punktet
+    for i in range(len(punkter)):
+        ret += vekter[i] * f(punkter[i])
+
+    return ret
+
 # En funksjon som bruker Gauss kvadrartur til å regne ut det bestemte integralet til en funksjon
 def GaussKvadratur(f, a = -1, b = 1, N = 7):
     # f : En funksjon å integrere
@@ -89,11 +102,7 @@ def GaussKvadratur(f, a = -1, b = 1, N = 7):
         vekter.append(vekt(polyDer, i))
 
     # regn ut summen vi nå har
-    SUM = 0
-
-    # Regn ut summan av f(x) til alle punktene, multiplisert med den tilsvarende vekten til punktet
-    for i in range(len(nullpunkter)):
-        SUM += vekter[i] * nyF(nullpunkter[i])
+    SUM = regnSUM(nyF, nullpunkter, vekter)
 
     # Returner summen vi fant
     return SUM
